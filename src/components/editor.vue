@@ -4,7 +4,7 @@
     <div>col: {{x}}, line: {{y}}</div>
     <div class="container">
       <div class="line" v-for="text in texts">
-        {{text}}
+        <TheLine :text="text" />
       </div>
       <span class="cursor" v-bind:style="{left: x * 0.6 + 'rem', top: y + 'rem'}"></span>
     </div>
@@ -13,14 +13,21 @@
 </template>
 
 <script>
+  import TheLine from './line.vue'
   export default {
     name: "editor",
+    components: {
+      TheLine
+    },
     methods: {
       handleClick: function(e) {
         this.$refs.textarea.focus();
       },
       handleKeyPress: function(e) {
-        console.log(e);
+        if (e.ctrlKey) {
+          this.$store.commit("control", e.key);
+          return;
+        }
         switch (e.key) {
           case "Enter": {
             this.$store.commit("enter");
@@ -37,7 +44,13 @@
             this.$store.commit("arrow", e.key.replace("Arrow", ""));
             break;
           }
+          case "Tab":
+            e.preventDefault()
+            this.$store.commit("addCharacter", "\t");
+            break;
+          case "Control":
           case "Meta":
+          case "Shift":
           case "Alt":
             break;
           default:
